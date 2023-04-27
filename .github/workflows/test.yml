@@ -16,4 +16,3 @@ jobs:
         with:
           deployment-url: https://action-vercel-deployment-info-kvmlvnbln-boredland.vercel.app
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT }}
