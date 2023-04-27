@@ -14,6 +14,6 @@ jobs:
       - name: retrieve some info
         uses: ./
         with:
-          storage-commit-sha: 13ef52e3a407d9828741990d69dded5a2b65f563
+          deployment_url: 13ef52e3a407d9828741990d69dded5a2b65f563
           key: run_id
           value: ${{ github.run_id }}
