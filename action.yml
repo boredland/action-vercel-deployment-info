@@ -13,9 +13,6 @@ inputs:
   vercel-org-id:
     description: Org/Team ID
     required: false
-  vercel-project-id:
-    description: Project ID 
-    required: true
 
 outputs:
   full:
