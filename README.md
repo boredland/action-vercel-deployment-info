@@ -4,7 +4,7 @@ This GitHub action retrieves information for a given vercel deployment.
 
 ## Inputs
 
-### `deployment_url`
+### `deployment-url`
 
 **Required** The URL to get the information for.
 

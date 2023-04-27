@@ -5,22 +5,49 @@ branding:
   color: blue
 
 inputs:
-  deployment_url:
+  deployment-url:
     description: The URL to get the information for.
   vercel-token:
     description: API token for Vercel
     required: true
   vercel-org-id:
     description: Org/Team ID
-    required: true
+    required: false
   vercel-project-id:
     description: Project ID 
     required: true
 
 outputs:
-  total_minutes_used:
-    description: minutes used throughout the last billing cycle
-    value: ${{ steps.info.outputs.total_minutes_used }}
+  full:
+    description: the full deployment information (json string)
+    value: ${{ steps.info.outputs.full }}
+  meta:
+    description: the meta deployment information (json string)
+    value: ${{ steps.info.outputs.meta }}
+  githubCommitSha:
+    description: the commit sha
+    value: ${{ steps.info.outputs.githubCommitSha }}
+  githubCommitAuthorName:
+    description: the commit author name
+    value: ${{ steps.info.outputs.githubCommitAuthorName }}
+  githubCommitMessage:
+    description: the commit message
+    value: ${{ steps.info.outputs.githubCommitMessage }}
+  githubCommitOrg:
+    description: the commit org
+    value: ${{ steps.info.outputs.githubCommitOrg }}
+  githubCommitRef:
+    description: the commit ref
+    value: ${{ steps.info.outputs.githubCommitRef }}
+  githubCommitRepo:
+    description: the commit repo
+    value: ${{ steps.info.outputs.githubCommitRepo }}
+  branchAlias:
+    description: the branch alias
+    value: ${{ steps.info.outputs.branchAlias }}
+  target:
+    description: the target (production|preview)
+    value: ${{ steps.info.outputs.target }}
 
 runs:
   using: "composite"
@@ -28,11 +55,30 @@ runs:
     - name: set deployment domain
       id: domain
       shell: bash
+      env:
+        URL: ${{inputs.deployment-url}}
       run: |
-        echo "domain=${DEPLOYMENT_URL#"https://"}" >>$GITHUB_OUTPUT
+        echo "domain=${URL#'https://'}" >>$GITHUB_OUTPUT
     - name: get recent deployments
       shell: bash
       run: |
-        DEPLOYMENTS=$(curl -H "Authorization: Bearer ${{inputs.vercel-token}}" "https://api.vercel.com/v6/deployments?teamId=${{inputs.vercel-org-id}}&projectId=${{inputs.vercel-project-id}}&limit=20")
-        DEPLOYMENT=$(cat $DEPLOYMENTS | jq -r '.deployments[] | select( .url | contains(${{ steps.domain.outputs.domain }}))')
-        echo $DEPLOYMENT
+        curl -H "Authorization: Bearer ${{inputs.vercel-token}}" "https://api.vercel.com/v6/deployments?projectId=${{inputs.vercel-project-id}}&limit=20&teamId=${{inputs.vercel-org-id}}" > deployments.json
+    - name: get the current deployment
+      shell: bash
+      run: |
+        cat deployments.json | jq -r '.deployments[] | select( .url | contains("${{ steps.domain.outputs.domain }}"))' > deployments.json
+    - name: extract information
+      id: info
+      shell: bash
+      run: |
+        echo "full=$(cat deployment.json)" >>$GITHUB_OUTPUT
+        echo "meta=$(cat deployment.json | jq -r '.meta')" >>$GITHUB_OUTPUT
+        echo "githubCommitSha=$(cat deployment.json | jq -r '.meta.githubCommitSha')" >>$GITHUB_OUTPUT
+        echo "githubCommitAuthorName=$(cat deployment.json | jq -r '.meta.githubCommitAuthorName')" >>$GITHUB_OUTPUT
+        echo "githubCommitMessage=$(cat deployment.json | jq -r '.meta.githubCommitMessage')" >>$GITHUB_OUTPUT
+        echo "githubCommitOrg=$(cat deployment.json | jq -r '.meta.githubCommitOrg')" >>$GITHUB_OUTPUT
+        echo "githubCommitRef=$(cat deployment.json | jq -r '.meta.githubCommitRef')" >>$GITHUB_OUTPUT
+        echo "githubCommitRepo=$(cat deployment.json | jq -r '.meta.githubCommitRepo')" >>$GITHUB_OUTPUT
+        echo "branchAlias=$(cat deployment.json | jq -r '.meta.branchAlias')" >>$GITHUB_OUTPUT
+        echo "target=$(cat deployment.json | jq -r '.meta.githubCommitSha')" >>$GITHUB_OUTPUT
+

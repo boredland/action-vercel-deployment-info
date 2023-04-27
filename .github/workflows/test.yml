@@ -14,7 +14,6 @@ jobs:
       - name: retrieve some info
         uses: ./
         with:
-          deployment_url: action-vercel-deployment-info-kvmlvnbln-boredland.vercel.app
+          deployment-url: https://action-vercel-deployment-info-kvmlvnbln-boredland.vercel.app
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT }}
