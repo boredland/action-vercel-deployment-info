@@ -1,8 +1,8 @@
 name: 'action vercel deployment info'
 description: 'This GitHub action retrieves information for a given vercel deployment.'
 branding:
-  icon: dollar-sign
-  color: blue
+  icon: 'triangle'
+  color: 'white'
 
 inputs:
   deployment-url:
