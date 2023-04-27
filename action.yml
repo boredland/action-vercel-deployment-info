@@ -15,24 +15,18 @@ inputs:
     required: false
 
 outputs:
-  full:
-    description: the full deployment information (refer https://vercel.com/docs/rest-api/endpoints#get-a-deployment-by-id-or-url)
-    value: ${{ steps.info.outputs.full }}
   name:
     description: the name of the project
     value: ${{ steps.info.outputs.sha }}
   sha:
     description: the commit sha
     value: ${{ steps.info.outputs.sha }}
-  prId:
+  githubPrId:
     description: the pr the deployment is for
-    value: ${{ steps.info.outputs.sha }}
+    value: ${{ steps.info.outputs.githubPrId }}
   githubCommitAuthorName:
     description: the commit author name
     value: ${{ steps.info.outputs.githubCommitAuthorName }}
-  githubCommitMessage:
-    description: the commit message
-    value: ${{ steps.info.outputs.githubCommitMessage }}
   githubCommitOrg:
     description: the commit org
     value: ${{ steps.info.outputs.githubCommitOrg }}
@@ -62,20 +56,23 @@ runs:
     - name: get the current deployment
       shell: bash
       run: |
-        curl -H "Authorization: Bearer ${{inputs.vercel-token}}" "https://api.vercel.com/v13/deployments/${{ steps.domain.outputs.domain }}?withGitRepoInfo=true&teamId=${{inputs.vercel-org-id}}" > deployment.json
+        curl -s -H "Authorization: Bearer ${{inputs.vercel-token}}" "https://api.vercel.com/v13/deployments/${{ steps.domain.outputs.domain }}?withGitRepoInfo=true&teamId=${{inputs.vercel-org-id}}" > deployment.json
+        cat deployment.json
     - name: extract information
       id: info
       shell: bash
       run: |
-        echo "full=$(cat deployment.json)" >>$GITHUB_OUTPUT
-        echo "ref=$(cat deployment.json | jq -r '.gitSource.ref')" >>$GITHUB_OUTPUT
-        echo "sha=$(cat deployment.json | jq -r '.gitSource.sha')" >>$GITHUB_OUTPUT
-        echo "prId=$(cat deployment.json | jq -r '.gitSource.prId')" >>$GITHUB_OUTPUT
-        echo "name=$(cat deployment.json | jq -r '.name')" >>$GITHUB_OUTPUT
-        echo "githubCommitAuthorName=$(cat deployment.json | jq -r '.meta.githubCommitAuthorName')" >>$GITHUB_OUTPUT
-        echo "githubCommitMessage=$(cat deployment.json | jq -r '.meta.githubCommitMessage')" >>$GITHUB_OUTPUT
-        echo "githubCommitOrg=$(cat deployment.json | jq -r '.meta.githubCommitOrg')" >>$GITHUB_OUTPUT
-        echo "githubCommitRepo=$(cat deployment.json | jq -r '.meta.githubCommitRepo')" >>$GITHUB_OUTPUT
-        echo "branchAlias=$(cat deployment.json | jq -r '.meta.branchAlias')" >>$GITHUB_OUTPUT
-        echo "target=$(cat deployment.json | jq -r '.meta.githubCommitSha')" >>$GITHUB_OUTPUT
+        echo "ref=$(cat deployment.json |jq -r '.gitSource.ref')" >>$GITHUB_OUTPUT
+        echo "sha=$(cat deployment.json |jq -r '.gitSource.sha')" >>$GITHUB_OUTPUT
+        echo "githubPrId=$(cat deployment.json |jq -r '.meta.githubPrId')" >>$GITHUB_OUTPUT
+        echo "name=$(cat deployment.json |jq -r '.name')" >>$GITHUB_OUTPUT
+        echo "githubCommitAuthorName=$(cat deployment.json |jq -r '.meta.githubCommitAuthorName')" >>$GITHUB_OUTPUT
+        echo "githubCommitOrg=$(cat deployment.json |jq -r '.meta.githubCommitOrg')" >>$GITHUB_OUTPUT
+        echo "githubCommitRepo=$(cat deployment.json |jq -r '.meta.githubCommitRepo')" >>$GITHUB_OUTPUT
+        echo "branchAlias=$(cat deployment.json |jq -r '.meta.branchAlias')" >>$GITHUB_OUTPUT
+    - name: output the payload
+      shell: bash
+      if: failure() || runner.debug == '1'
+      run: |
+        cat deployment.json
 
