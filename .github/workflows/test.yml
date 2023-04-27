@@ -1,0 +1,19 @@
+name: "build-test"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+      - name: retrieve some info
+        uses: ./
+        with:
+          storage-commit-sha: 13ef52e3a407d9828741990d69dded5a2b65f563
+          key: run_id
+          value: ${{ github.run_id }}

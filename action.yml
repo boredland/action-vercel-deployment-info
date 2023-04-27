@@ -1,0 +1,38 @@
+name: 'action vercel deployment info'
+description: 'This GitHub action retrieves information for a given vercel deployment.'
+branding:
+  icon: dollar-sign
+  color: blue
+
+inputs:
+  deployment_url:
+    description: The URL to get the information for.
+  vercel-token:
+    description: API token for Vercel
+    required: true
+  vercel-org-id:
+    description: Org/Team ID
+    required: true
+  vercel-project-id:
+    description: Project ID 
+    required: true
+
+outputs:
+  total_minutes_used:
+    description: minutes used throughout the last billing cycle
+    value: ${{ steps.info.outputs.total_minutes_used }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: set deployment domain
+      id: domain
+      shell: bash
+      run: |
+        echo "domain=${DEPLOYMENT_URL#"https://"}" >>$GITHUB_OUTPUT
+    - name: get recent deployments
+      shell: bash
+      run: |
+        DEPLOYMENTS=$(curl -H "Authorization: Bearer ${{inputs.vercel-token}}" "https://api.vercel.com/v6/deployments?teamId=${{inputs.vercel-org-id}}&projectId=${{inputs.vercel-project-id}}&limit=20")
+        DEPLOYMENT=$(cat $DEPLOYMENTS | jq -r '.deployments[] | select( .url | contains(${{ steps.domain.outputs.domain }}))')
+        echo $DEPLOYMENT
