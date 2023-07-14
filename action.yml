@@ -42,6 +42,12 @@ outputs:
   target:
     description: the target (production|preview)
     value: ${{ steps.info.outputs.target }}
+  inspectorUrl:
+    description: the inspectorUrl
+    value: ${{ steps.info.outputs.inspectionUrl }}
+  creator:
+    description: the username of the deployment creator 
+    value: ${{ steps.info.outputs.creator }}
 
 runs:
   using: "composite"
@@ -70,9 +76,10 @@ runs:
         echo "githubCommitOrg=$(cat deployment.json |jq -r '.meta.githubCommitOrg')" >>$GITHUB_OUTPUT
         echo "githubCommitRepo=$(cat deployment.json |jq -r '.meta.githubCommitRepo')" >>$GITHUB_OUTPUT
         echo "branchAlias=$(cat deployment.json |jq -r '.meta.branchAlias')" >>$GITHUB_OUTPUT
+        echo "inspectorUrl=$(cat deployment.json |jq -r '.inspectorUrl')" >>$GITHUB_OUTPUT
+        echo "creator=$(cat deployment.json |jq -r '.creator.username')" >>$GITHUB_OUTPUT
     - name: output the payload
       shell: bash
       if: failure() || runner.debug == '1'
       run: |
         cat deployment.json
-
