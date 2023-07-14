@@ -78,6 +78,7 @@ runs:
         echo "branchAlias=$(cat deployment.json |jq -r '.meta.branchAlias')" >>$GITHUB_OUTPUT
         echo "inspectorUrl=$(cat deployment.json |jq -r '.inspectorUrl')" >>$GITHUB_OUTPUT
         echo "creator=$(cat deployment.json |jq -r '.creator.username')" >>$GITHUB_OUTPUT
+        echo "target=$(cat deployment.json |jq -r '.target')" >>$GITHUB_OUTPUT
     - name: output the payload
       shell: bash
       if: failure() || runner.debug == '1'
