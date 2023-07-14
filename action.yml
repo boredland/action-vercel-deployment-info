@@ -43,10 +43,10 @@ outputs:
     description: the target (production|preview)
     value: ${{ steps.info.outputs.target }}
   inspectorUrl:
-    description: the inspectorUrl url of the deployment
+    description: the inspectorUrl
     value: ${{ steps.info.outputs.inspectionUrl }}
   creator:
-    description: the name of the creator of the deployment
+    description: the username of the deployment creator 
     value: ${{ steps.info.outputs.creator }}
 
 runs:
